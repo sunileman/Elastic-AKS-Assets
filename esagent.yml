@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elastic-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elastic-agent
+  template:
+    metadata:
+      labels:
+        app: elastic-agent
+    spec:
+      serviceAccountName: fleet-server
+      automountServiceAccountToken: true
+      securityContext:
+        runAsUser: 0
+      containers:
+      - name: elastic-agent
+        image: docker.elastic.co/beats/elastic-agent:8.4.2
+        env:
+        - name: FLEET_ENROLL
+          value: "1"
+        - name: FLEET_URL
+          value: "https://<YOUR-FLEET-URL:443"
+        - name: FLEET_ENROLLMENT_TOKEN
+          value: "<YOUR-FLEET-ENROLLMENT-TOKEN"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        ports:
+        - containerPort: 8200
+          name: http
